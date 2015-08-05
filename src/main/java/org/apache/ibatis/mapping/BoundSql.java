@@ -53,6 +53,10 @@ public class BoundSql {
     return sql;
   }
 
+  public void setSql(String sql){
+    this.sql = sql;
+  }
+
   public List<ParameterMapping> getParameterMappings() {
     return parameterMappings;
   }

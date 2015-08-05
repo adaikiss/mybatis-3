@@ -77,6 +77,10 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   private final TypeHandlerRegistry typeHandlerRegistry;
   private final ObjectFactory objectFactory;
   private final ReflectorFactory reflectorFactory;
+  /**
+   * pagination through ResultSet
+   */
+  private final boolean resultSetPagination;
 
   // nested resultmaps
   private final Map<CacheKey, Object> nestedResultObjects = new HashMap<CacheKey, Object>();
@@ -97,6 +101,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       RowBounds rowBounds) {
     this.executor = executor;
     this.configuration = mappedStatement.getConfiguration();
+    this.resultSetPagination = configuration.getRowBoundsHandler() == null;
     this.mappedStatement = mappedStatement;
     this.rowBounds = rowBounds;
     this.parameterHandler = parameterHandler;
@@ -313,7 +318,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
   private void handleRowValuesForSimpleResultMap(ResultSetWrapper rsw, ResultMap resultMap, ResultHandler<?> resultHandler, RowBounds rowBounds, ResultMapping parentMapping)
       throws SQLException {
     DefaultResultContext<Object> resultContext = new DefaultResultContext<Object>();
-    skipRows(rsw.getResultSet(), rowBounds);
+    if(this.resultSetPagination){
+      skipRows(rsw.getResultSet(), rowBounds);
+    }
     while (shouldProcessMoreRows(resultContext, rowBounds) && rsw.getResultSet().next()) {
       ResultMap discriminatedResultMap = resolveDiscriminatedResultMap(rsw.getResultSet(), resultMap, null);
       Object rowValue = getRowValue(rsw, discriminatedResultMap);
@@ -761,7 +768,9 @@ public class DefaultResultSetHandler implements ResultSetHandler {
 
   private void handleRowValuesForNestedResultMap(ResultSetWrapper rsw, ResultMap resultMap, ResultHandler<?> resultHandler, RowBounds rowBounds, ResultMapping parentMapping) throws SQLException {
     final DefaultResultContext<Object> resultContext = new DefaultResultContext<Object>();
-    skipRows(rsw.getResultSet(), rowBounds);
+    if(this.resultSetPagination){
+      skipRows(rsw.getResultSet(), rowBounds);
+    }
     Object rowValue = previousRowValue;
     while (shouldProcessMoreRows(resultContext, rowBounds) && rsw.getResultSet().next()) {
       final ResultMap discriminatedResultMap = resolveDiscriminatedResultMap(rsw.getResultSet(), resultMap, null);

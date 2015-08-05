@@ -49,6 +49,7 @@ import org.apache.ibatis.executor.loader.ProxyFactory;
 import org.apache.ibatis.executor.loader.cglib.CglibProxyFactory;
 import org.apache.ibatis.executor.loader.javassist.JavassistProxyFactory;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
+import org.apache.ibatis.executor.parameter.RowBoundsHandler;
 import org.apache.ibatis.executor.resultset.DefaultResultSetHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.executor.statement.RoutingStatementHandler;
@@ -126,6 +127,12 @@ public class Configuration {
   protected ProxyFactory proxyFactory = new JavassistProxyFactory(); // #224 Using internal Javassist instead of OGNL
 
   protected String databaseId;
+
+  /**
+   * custom rowBounds handler, instead of using ResultSet style pagination.
+   */
+  protected RowBoundsHandler rowBoundsHandler;
+
   /**
    * Configuration factory class.
    * Used to create Configuration for loading deserialized unread properties.
@@ -445,6 +452,14 @@ public class Configuration {
     this.objectWrapperFactory = objectWrapperFactory;
   }
 
+  public RowBoundsHandler getRowBoundsHandler() {
+    return rowBoundsHandler;
+  }
+
+  public void setRowBoundsHandler(RowBoundsHandler rowBoundsHandler) {
+    this.rowBoundsHandler = rowBoundsHandler;
+  }
+
   /**
    * @since 3.2.2
    */
@@ -485,6 +500,9 @@ public class Configuration {
   }
 
   public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+    if(rowBounds != RowBounds.DEFAULT && rowBoundsHandler != null){//rowBounds specified.
+      boundSql.setSql(rowBoundsHandler.handle(boundSql.getSql(), rowBounds));
+    }
     StatementHandler statementHandler = new RoutingStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
     statementHandler = (StatementHandler) interceptorChain.pluginAll(statementHandler);
     return statementHandler;
