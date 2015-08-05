@@ -15,6 +15,7 @@
  */
 package org.apache.ibatis.builder.xml;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -46,6 +47,17 @@ import org.apache.ibatis.parsing.XPathParser;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 
 /**
  * @author Clinton Begin
@@ -57,6 +69,8 @@ public class XMLMapperBuilder extends BaseBuilder {
   private Map<String, XNode> sqlFragments;
   private String resource;
 
+  private DocumentBuilder documentBuilder;
+
   @Deprecated
   public XMLMapperBuilder(Reader reader, Configuration configuration, String resource, Map<String, XNode> sqlFragments, String namespace) {
     this(reader, configuration, resource, sqlFragments);
@@ -66,7 +80,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   @Deprecated
   public XMLMapperBuilder(Reader reader, Configuration configuration, String resource, Map<String, XNode> sqlFragments) {
     this(new XPathParser(reader, true, configuration.getVariables(), new XMLMapperEntityResolver()),
-        configuration, resource, sqlFragments);
+            configuration, resource, sqlFragments);
   }
 
   public XMLMapperBuilder(InputStream inputStream, Configuration configuration, String resource, Map<String, XNode> sqlFragments, String namespace) {
@@ -85,11 +99,63 @@ public class XMLMapperBuilder extends BaseBuilder {
     this.parser = parser;
     this.sqlFragments = sqlFragments;
     this.resource = resource;
+    try {
+      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+      //ignore DTD
+      dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+      this.documentBuilder = dbf.newDocumentBuilder();
+    } catch (ParserConfigurationException e) {
+      e.printStackTrace();
+    }
   }
 
   public void parse() {
     if (!configuration.isResourceLoaded(resource)) {
-      configurationElement(parser.evalNode("/mapper"));
+      // Merge begin
+      XNode mapperNode = parser.evalNode("/mapper");
+      if (configuration.getMergePackageReplaceSource() != null) {
+        InputStream is = null;
+        try {
+          is = Resources.getResourceAsStream(resource.replace(configuration.getMergePackageReplaceSource(),
+                  configuration.getMergePackageReplaceDestination()));
+        } catch (IOException e) {
+          // ignore, resource is not required
+        }
+        try {
+          if (is != null) {
+            XPath xpath = XPathFactory.newInstance().newXPath();
+            Document isDoc = documentBuilder.parse(is);
+            Document doc = mapperNode.getNode().getOwnerDocument();
+            NodeList nodes = (NodeList) xpath.evaluate("/mapper/*", isDoc,
+                    XPathConstants.NODESET);
+            int nodeCount = nodes.getLength();
+            Node generated = mapperNode.getNode();
+            for (int i = 0; i < nodeCount; i++) {
+              //append nodes, or replace if tag name and id attribute matches.
+              Node node = doc.importNode(nodes.item(i), true);
+              Element nodeEl = (Element)node;
+              XNode exists = mapperNode.evalNode(nodeEl.getTagName() + "[@id='" + nodeEl.getAttribute("id") + "']");
+              if(exists!= null){
+                generated.replaceChild(node, exists.getNode());
+              }else{
+                generated.appendChild(node);
+              }
+            }
+          }
+        } catch (Exception e) {
+          throw new RuntimeException("error loading isolate mapper resource!" + resource, e);
+        } finally {
+          if (is != null) {
+            try {
+              is.close();
+            } catch (IOException e) {
+            }
+          }
+        }
+      }
+      // Merge end
+
+      configurationElement(mapperNode);
       configuration.addLoadedResource(resource);
       bindMapperForNamespace();
     }

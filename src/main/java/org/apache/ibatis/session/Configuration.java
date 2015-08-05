@@ -129,6 +129,15 @@ public class Configuration {
   protected String databaseId;
 
   /**
+   * Generated codes and custom codes merge package replace source.
+   */
+  protected String mergePackageReplaceSource;
+  /**
+   * package replace destination
+   */
+  protected String mergePackageReplaceDestination;
+
+  /**
    * custom rowBounds handler, instead of using ResultSet style pagination.
    */
   protected RowBoundsHandler rowBoundsHandler;
@@ -458,6 +467,22 @@ public class Configuration {
 
   public void setRowBoundsHandler(RowBoundsHandler rowBoundsHandler) {
     this.rowBoundsHandler = rowBoundsHandler;
+  }
+
+  public String getMergePackageReplaceDestination() {
+    return mergePackageReplaceDestination;
+  }
+
+  public void setMergePackageReplaceDestination(String mergePackageReplaceDestination) {
+    this.mergePackageReplaceDestination = mergePackageReplaceDestination;
+  }
+
+  public String getMergePackageReplaceSource() {
+    return mergePackageReplaceSource;
+  }
+
+  public void setMergePackageReplaceSource(String mergePackageReplaceSource) {
+    this.mergePackageReplaceSource = mergePackageReplaceSource;
   }
 
   /**
