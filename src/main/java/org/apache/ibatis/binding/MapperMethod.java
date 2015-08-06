@@ -180,6 +180,9 @@ public class MapperMethod {
     @Override
     public V get(Object key) {
       if (!super.containsKey(key)) {
+        if(key.toString().startsWith("$")){//we need a way to allow undefined parameters. eg:parameters appears while calling from Mapper interface but missed in inline select.
+          return null;
+        }
         throw new BindingException("Parameter '" + key + "' not found. Available parameters are " + keySet());
       }
       return super.get(key);
