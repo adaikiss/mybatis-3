@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.ibatis.binding.DynamicContextInterceptor;
 import org.apache.ibatis.binding.MapperRegistry;
 import org.apache.ibatis.builder.CacheRefResolver;
 import org.apache.ibatis.builder.ResultMapResolver;
@@ -141,6 +142,11 @@ public class Configuration {
    * custom rowBounds handler, instead of using ResultSet style pagination.
    */
   protected RowBoundsHandler rowBoundsHandler;
+
+  /**
+   * DynamicContext interceptor, eg:bind dynamic variables to DynamicContext.
+   */
+  protected DynamicContextInterceptor dynamicContextInterceptor;
 
   /**
    * Configuration factory class.
@@ -483,6 +489,14 @@ public class Configuration {
 
   public void setMergePackageReplaceSource(String mergePackageReplaceSource) {
     this.mergePackageReplaceSource = mergePackageReplaceSource;
+  }
+
+  public DynamicContextInterceptor getDynamicContextInterceptor() {
+    return dynamicContextInterceptor;
+  }
+
+  public void setDynamicContextInterceptor(DynamicContextInterceptor dynamicContextInterceptor) {
+    this.dynamicContextInterceptor = dynamicContextInterceptor;
   }
 
   /**
