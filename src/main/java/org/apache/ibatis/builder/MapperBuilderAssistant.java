@@ -240,7 +240,12 @@ public class MapperBuilderAssistant extends BaseBuilder {
         null,
         null,
         false);
-    Map<String, String> namespaceDiscriminatorMap = new HashMap<String, String>();
+    Map<String, String> namespaceDiscriminatorMap = null;
+    try {
+       namespaceDiscriminatorMap = configuration.getDescriminatorMapClass().newInstance();
+    } catch (Exception e) {
+       throw new IncompleteElementException("namespaceDiscriminatorMap can not be instantiated.", e);
+    }
     for (Map.Entry<String, String> e : discriminatorMap.entrySet()) {
       String resultMap = e.getValue();
       resultMap = applyCurrentNamespace(resultMap, true);

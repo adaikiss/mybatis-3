@@ -149,6 +149,11 @@ public class Configuration {
   protected DynamicContextInterceptor dynamicContextInterceptor;
 
   /**
+   * provide a way to use custom Discriminator Map Class, eg: not-found-to-default discriminator map.
+   */
+  protected Class<? extends Map> descriminatorMapClass = HashMap.class;
+
+  /**
    * Configuration factory class.
    * Used to create Configuration for loading deserialized unread properties.
    *
@@ -497,6 +502,14 @@ public class Configuration {
 
   public void setDynamicContextInterceptor(DynamicContextInterceptor dynamicContextInterceptor) {
     this.dynamicContextInterceptor = dynamicContextInterceptor;
+  }
+
+  public Class<? extends Map> getDescriminatorMapClass() {
+    return descriminatorMapClass;
+  }
+
+  public void setDescriminatorMapClass(Class<? extends Map> descriminatorMapClass) {
+    this.descriminatorMapClass = descriminatorMapClass;
   }
 
   /**
