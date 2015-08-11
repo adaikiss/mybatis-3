@@ -151,7 +151,7 @@ public class Configuration {
   /**
    * provide a way to use custom Discriminator Map Class, eg: not-found-to-default discriminator map.
    */
-  protected Class<? extends Map> descriminatorMapClass = HashMap.class;
+  protected Class<? extends Map> discriminatorMapClass = HashMap.class;
 
   /**
    * Configuration factory class.
@@ -504,12 +504,12 @@ public class Configuration {
     this.dynamicContextInterceptor = dynamicContextInterceptor;
   }
 
-  public Class<? extends Map> getDescriminatorMapClass() {
-    return descriminatorMapClass;
+  public Class<? extends Map> getDiscriminatorMapClass() {
+    return discriminatorMapClass;
   }
 
-  public void setDescriminatorMapClass(Class<? extends Map> descriminatorMapClass) {
-    this.descriminatorMapClass = descriminatorMapClass;
+  public void setDiscriminatorMapClass(Class<? extends Map> discriminatorMapClass) {
+    this.discriminatorMapClass = discriminatorMapClass;
   }
 
   /**

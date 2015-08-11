@@ -242,7 +242,7 @@ public class MapperBuilderAssistant extends BaseBuilder {
         false);
     Map<String, String> namespaceDiscriminatorMap = null;
     try {
-       namespaceDiscriminatorMap = configuration.getDescriminatorMapClass().newInstance();
+       namespaceDiscriminatorMap = configuration.getDiscriminatorMapClass().newInstance();
     } catch (Exception e) {
        throw new IncompleteElementException("namespaceDiscriminatorMap can not be instantiated.", e);
     }
